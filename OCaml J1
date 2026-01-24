@@ -1,0 +1,120 @@
+(*fonctions basiques aujourd'hui pour reprendre l'OCaml*) 
+
+
+(*factorielle*)
+let fact n  = 
+   let rep = ref 1 in 
+   for i = 1 to n do
+     rep := !rep * i
+   done ;
+   !rep;;
+
+ fact 5;;
+
+
+(*somme d'éléments d'une liste*)
+let rec somme liste = match liste with 
+   |[] -> 0
+   |a::q -> a + somme q;;
+
+ somme [5; 9; 1];;
+    
+(*maximum d'une liste*)
+ let rec max_liste liste = match liste with 
+   |[] -> failwith "liste vide"
+   |[a] -> a 
+   |a::q -> max a (max_liste q);;
+
+ max_liste [5; 9; 1];;
+
+(*tests de fonctions du module List*)
+ List.hd [5; 9; 1];;
+ List.tl [5; 9; 1];; 
+ List.rev [5; 9; 1];;
+ List.length [5; 9; 1];; 
+
+(*norme d'un vecteur*) 
+let norme vecteur = sqrt( (fst(vecteur))**2. +. (snd(vecteur))**2.);;
+norme(3., 4.);;
+
+(*puissance recursive*)
+let rec puissance x n=
+  if n = 0 then 1. 
+  else x *. (puissance x (n-1));;
+
+puissance 3. 2;;
+
+(*composition de fonctions*)
+let compose f g x = f (g x);;
+
+let x = 3 in
+let f x = x + 1 in
+let g x = 2 * x in 
+compose f g x;;
+
+compose (fun x -> x + 1) (fun x -> 2*x) 3;;
+
+
+(*maximum d'une liste v2*)
+let rec max_list = function 
+  |[] -> failwith "vide"
+  |[a] -> a
+  |a::q -> max a (max_list q);;
+
+max_list [6; 1; 9];;
+
+(*longueur d'une liste*)
+let rec longueur = function 
+  |[] -> 0 
+  |a::q -> 1 + (longueur q);;
+
+longueur [6; 8; 1];;
+
+(*maximum de deux listes*)
+let rec max_liste u v = match (u, v) with
+  |([] , v) -> v 
+  | (u , []) -> u 
+  |(a::q, b::s) -> (max a b)::max_liste q s;;
+
+max_liste [6; 1; 9; 8; 10] [7; 10; 2; 4];; 
+
+(*test d'appartenance*)
+let rec appartient x l = match l with 
+  |[] -> false
+  |a::q when a = x -> true
+  |a::q -> appartient x q;;
+
+appartient 7 [7; 6; 1; 0];; 
+
+(*nombre d'éléments pairs dans une liste*)
+let rec nb_pairs liste = match liste with 
+  |[] -> 0 
+  |a::q when a mod 2 = 0 -> 1 + nb_pairs q 
+  |a::q -> nb_pairs q;;
+
+nb_pairs [6; 8; 7; 4];;
+
+(*signe d'un entier*)
+let signe n = 
+  if n > 0 then 1 
+  else if n < 0 then -1 
+  else 0;;
+
+signe 0;;
+
+(*manipulation de types basiques*) 
+
+(*signe d'un produit*) 
+type signe = Positif | Negatif;; 
+
+let signe_produit x y = match x, y with 
+  |Positif , Negatif | Negatif, Positif -> Negatif
+  |Negatif, Negatif -> Positif 
+  |Positif, Positif -> Positif;;
+
+(*fonction et*)
+type bool = Vrai | Faux;; 
+
+let et (a : bool) (b : bool) = match a,b with 
+  |_, Faux | Faux, _ -> Faux 
+  |Vrai, Vrai -> Vrai;;
