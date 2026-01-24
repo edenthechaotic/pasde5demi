@@ -118,3 +118,29 @@ type bool = Vrai | Faux;;
 let et (a : bool) (b : bool) = match a,b with 
   |_, Faux | Faux, _ -> Faux 
   |Vrai, Vrai -> Vrai;;
+
+(*type complexe et fonctions conjugué et norme*)
+
+type complexe = {re : float; im : float};;
+
+let conjugue (x : complexe) = {re = x.re; im = -.x.im};;
+
+
+conjugue {re = -1.; im = 7.};;
+
+
+let norme (z : complexe) = match z with 
+  |{re = x; im = y} -> sqrt( x ** 2. +. y ** 2.);;
+
+norme {re = -1.; im = 7.};;
+
+(*type carte exemple*)
+
+type couleur = Pique | Coeur | Carreau | Trefle;;
+type valeur = As | Roi | Dame | Valet | Mineure of int;;
+type carte = {co : couleur ; va : valeur};;
+
+let trefle_ou_huit carte = 
+  (carte.co = Trefle) || (carte.va = Mineure 8);;
+
+trefle_ou_huit {co = Pique; va = Mineure 10};;
