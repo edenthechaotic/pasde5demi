@@ -132,7 +132,7 @@ conjugue {re = -1.; im = 7.};;
 let norme (z : complexe) = match z with 
   |{re = x; im = y} -> sqrt( x ** 2. +. y ** 2.);;
 
-norme {re = -1.; im = 7.};;
+norme {re = -2.; im = 7.};;
 
 (*type carte exemple*)
 
