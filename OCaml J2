@@ -1,0 +1,59 @@
+(*fonction qui print le nombre si il est pair*)
+let  print_if_pair n = 
+        if n mod 2 = 0
+        then print_int n 
+        else ();; 
+
+
+print_if_pair 4;; 
+
+print_endline "";; 
+
+(*deux manières d'incrémenter un compteur*)
+
+type compteur = { debut : int; fin : int; mutable counte : int};;  
+
+let incremente (c : compteur) = 
+       if c.counte < c.fin then c.counte <- c.counte + 1
+       else failwith "compteur trop grand";; 
+
+let a = { debut = 0; fin = 5; counte = 3};;
+
+incremente a;; 
+
+print_int a.counte;; 
+
+print_endline "";;
+
+let increment_bis (c : compteur) =
+        if c.counte < c.fin then 
+        begin 
+                print_string "la nouvelle valeur est "; 
+                c.counte <- c.counte + 1; 
+                print_int c.counte;
+                print_endline "\n";
+        end 
+        else failwith "pas possible"
+;; 
+
+increment_bis a;; 
+
+(*on cherche le premier entier k tq k! > n*)
+
+let inverse_fact (n : int) = 
+        let k = ref 0 in 
+        let f = ref 1 in 
+        while !f < n do 
+                k := !k +1; f := !f * !k 
+        done;
+        print_int !k; 
+        print_endline "\n";
+        !k;; 
+
+inverse_fact 5;; 
+
+Printf.printf("\n");; 
+
+(*a finir : somme des éléments d'une liste de couples*)
+let somme_couple (l : (int*int)  list) = 
+        List.map  (fun (x,y) -> x + y) l;; 
