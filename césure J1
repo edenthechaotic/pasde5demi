@@ -1,0 +1,89 @@
+(*factorielle avec un assert*)
+
+let fact (n : int) : int = 
+  assert(n>0); 
+  let rep = ref 1 in 
+  for i = 1 to n-1 do 
+    rep := !rep * i; 
+  done;
+  !rep;; 
+
+fact 6;;
+fact (-7);;
+
+(*élement d'indice n de la suite de syracuse associée à a*)
+
+let rec syracuse (n : int) (a : int) = match n with 
+  |0 -> a
+  |n when n mod 2 == 0 -> syracuse(n-1) a / 2
+  |n -> 3*(syracuse(n-1) a) + 1;; 
+
+syracuse 7 15;;
+
+(*indice du minimum d'un tableau*)
+
+let min_ind (t : int array) = 
+  let l = ref 0 in 
+  let m = ref t.(0) in 
+  for i = 0 to (Array.length t) -1 do 
+    if t.(i) < !m then begin 
+      m := t.(i);
+      l := i; 
+    end
+  done;
+  !l;;
+
+
+min_ind [|7; 19; 3|];;
+
+(*exponentiation rapide, a^n*)
+
+
+let expo (a :int) (n : int) : int = 
+  let p = ref n in
+  let x = ref 1 in 
+  let b = ref a in 
+  while !p <> 0 do 
+    if !p mod 2 = 1 then x := !x * !b; 
+    b := !b * !b; 
+    p := !p/2; 
+  done; 
+  !x;;
+
+expo 3 2;;
+
+(*recherche dichotomique*)
+
+let dich (x : int) (t : int array) : int = 
+  let rec aux deb fin = 
+    if deb > fin then -1 
+    else 
+      let mid = (deb + fin) / 2 in 
+      if t.(mid) = x then mid
+      else if t.(mid) < x then aux (mid+1) fin
+      else aux deb (mid-1)
+  in aux 0 (Array.length t - 1);;
+
+
+dich 12 [|12; 27; 30; 45; 50; 69; 92|];; 
+    
+
+(*exponentiation rapide récursive*)
+
+let rec expo_rapide (n : int) (x : int) : int = 
+  if n = 0 then 1 
+  else if n mod 2 = 0 then expo_rapide (n/2) (x*x)
+  else (expo_rapide (n/2) (x*x)) * x;;
+
+
+expo_rapide 9 3;;
+
+(*test d'appartenance à une liste*)
+
+let rec appartient (u : int list) (x : int) : bool = match u with 
+  |[] -> false
+  |a::b -> (a = x) || appartient b x;;
+
+appartient [6; 9; 0; 1] 1;;
+  
+
