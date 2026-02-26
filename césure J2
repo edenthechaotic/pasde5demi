@@ -1,0 +1,188 @@
+(*implémentation d'un graphe en liste d'adjacence*)
+
+type graphe = int list array;;
+
+
+let create (n : int) : graphe = 
+  Array.make n [];; 
+
+let size (g : graphe) : int = 
+  Array.length g;;
+
+let has_edge (g : graphe) (u : int) (v : int) : bool = 
+  List.mem v g.(u);;
+
+let add_edge (g : graphe) (u : int) (v : int)  = 
+  if not (has_edge g u v) then 
+    g.(u) <- v::g.(u);;
+
+let succ (g : graphe) (u : int) : int list = 
+  g.(u);;
+
+let edges (g : graphe) : (int*int) list = 
+  let l = ref [] in 
+  for i = 0 to Array.length g-1 do 
+    List.iter (fun x -> l := (i,x):: !l) g.(i)
+  done;
+  !l;;
+
+(*graphe pondéré bref overview*)
+
+type wgraphe = (int*float) list array;;
+
+let poids (g : wgraphe) (u : int) (v :int) : float = 
+  List.assoc v g.(u);;
+
+let w_size (g : wgraphe) : int = 
+  Array.length g;;
+
+let w_edges (g : wgraphe) : (float *int * int) list = 
+  let l = ref [] in 
+  for i = 0 to Array.length g - 1 do 
+    List.iter (fun (x, _) -> l := ((poids g i x), i, x)::!l) g.(i)
+  done;
+  !l;;
+
+(*DFS d'un graphe*)
+
+let dfs (g : graphe) (source : int) : bool array = 
+  let visited = Array.make (size g) false in 
+  let rec dfs v = 
+    if not visited.(v) then 
+      ( 
+        visited.(v) <- true; 
+        List.iter dfs (succ g v); 
+      )
+  in 
+  dfs source; 
+  visited;; 
+
+(*composantes connexes d'un graphe*)
+
+let composantes (g : graphe) : int *(int array) = 
+  let n = size g in 
+  let nc = ref 0 in 
+  let num = Array.make (size g) 0 in 
+  let visited = Array.make (size g) false in 
+  let rec bfs (v : int) = 
+    for i = 0 to size g - 1 do 
+      if not visited.(i) then 
+        (
+          visited.(i) <- true; 
+          num.(i) <- !nc;
+          List.iter bfs (succ g v); 
+        )
+    done; 
+  in 
+  let component v = 
+    if not visited.(v) then (bfs v; incr nc) in 
+  for v = 0 to n-1 do component v done; 
+  !nc, num;;
+
+
+(*ordre postfixe d'un parcours en profondeur*) 
+
+let postfixe (g : graphe) : int list =
+  let visited = Array.make (size g) false in 
+  let order = ref [] in 
+  let rec dfs v =
+    if not visited.(v) then 
+      (
+        visited.(v) <- true;
+        order := v:: !order; 
+        List.iter dfs (succ g v); 
+      ) 
+  in for i = 0 to size g - 1 do dfs i done; 
+  !order;;
+
+
+(*implémentation express d'une file en ocaml*)
+
+type 'a queue = { front : 'a list; 
+                  rear : 'a list};;
+
+let empty : 'a queue = { front = [] ; rear = []};;
+
+let is_empty (q : 'a queue) : bool = (q.front = []) && (q.rear = []);;
+
+let enqueue (q : 'a queue) (x : 'a) : 'a queue = 
+  { front = q.front; rear = x::q.rear};;
+
+let dequeue (q : 'a queue) : 'a * 'a queue = match q.front with 
+  |x::b -> (x, {front = b; rear = q.rear}) 
+  |[] -> 
+      match List.rev q.rear with 
+      |[] -> failwith "vide"
+      |x::b -> (x, {front = []; rear = b});;
+          
+
+
+
+
+
+(*parcours en largeur d'un graphe : pas le meme module *)
+
+let bfs (g : graphe) (s : int) : int array = 
+  let dist = Array.make (size g) max_int in 
+  let q = Queue.create () in
+  Queue.push s q; 
+  dist.(s) <- 0; 
+  while not (Queue.is_empty q) do 
+    let v = Queue.pop q in 
+    let d = dist.(v) in 
+    List.iter (fun i -> 
+        if dist.(i) = max_int then
+          (dist.(i) <- d + 1; 
+           Queue.push i q)) (succ g v)  
+  done; 
+  dist;;
+
+(*algorithme de Floyd-Warshall*)
+
+let floyd_warshall (g : wgraphe) : float array array = 
+  let n = w_size g in 
+  let dist = Array.make_matrix n n infinity in 
+  List.iter (fun (d, i, j) -> dist.(i).(j) <- d) (w_edges g); 
+  for i = 0 to n-1 do 
+    dist.(i).(i) <- 0. done; 
+  for j = 0 to n-1 do 
+    for l = 0 to n-1 do 
+      for k = 0 to n-1 do 
+        let x = dist.(j).(k) +. dist.(k).(l) in 
+        if x < dist.(j).(l) then dist.(j).(l) <- x;
+      done
+    done
+  done; 
+  dist;;
+
+
+(*test de FL*) 
+
+let ex : wgraphe = [|
+  [(1, 2.0); (2, 5.0)];   (* sommet 0 -> 1 (poids 2) et 0 -> 2 (poids 5) *)
+  [(2, 1.0); (3, 4.0)];   (* sommet 1 -> 2 (poids 1) et 1 -> 3 (poids 4) *)
+  [(3, 3.0)];             (* sommet 2 -> 3 (poids 3) *)
+  []                      (* sommet 3 -> rien *)
+|];;
+
+floyd_warshall ex;;
+
+
+(*algorithme de Dijkstra on suppose une file de priorité déjà implémentée*)
+
+let dijkstra (g : wgraphe) (s : int) = 
+  let dist = Array.make (w_size g) infinity in 
+  let q = Pqueue.create () in 
+  let visited = Array.make (w_size g) false in
+  let add d v = dist.(v) <- d; Pqueue.push (d, v) q in 
+  add 0. s; 
+  while not (Pqueue.is_empty q) do 
+    let dv, v = Pqueue.pop q in 
+    if not (visited.(v)) then 
+      (
+        visited.(v) <- true; 
+        List.iter (fun (w, dvw) -> let d = dv +. dvw in 
+                    if d < dist.(w) then add d w) (succ g v)
+      )
+  done; 
+  dist;;
