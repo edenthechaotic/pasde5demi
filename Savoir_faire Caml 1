@@ -1,0 +1,240 @@
+(*minimum d'un tableau *)
+
+let minimum (tab : int array) : int = 
+  let len = Array.length tab in 
+  let rep = ref tab.(0) in
+  for i = 1 to len - 1 do 
+    if tab.(i) < !rep then 
+      rep := tab.(i)
+    else rep := !rep
+  done; 
+  !rep;;
+
+
+minimum [| 7; 9; 1; 6|];;
+
+(*algorithme d'euclide*)
+
+let rec pgcd (a : int) (b : int) = 
+  if b = 0 then a 
+  else pgcd b (a mod b);;
+
+pgcd 12 16;; 
+pgcd 1 8;;
+
+(*méthode de horner ordre croissant des puissances*) 
+
+let horner (coeff : int array) (x : int) = 
+  let len = Array.length coeff in 
+  let rep = ref coeff.(len-1) in 
+  for i = len-2 downto 0 do 
+    rep := !rep * x + coeff.(i); 
+  done; 
+  !rep;;
+
+horner [| 2; 3; 1 |] 2;;
+
+(*exponentiation rapide*) 
+
+let rec expo_rap (x :int) (n : int) = 
+  if n = 0 then 1 
+  else if n mod 2 = 0 then
+    let rep = expo_rap x (n/2) in rep*rep
+  else x * expo_rap x (n-1);;
+
+
+expo_rap 3 3;;
+
+(*décomposition en base b*)
+
+let decomposition (n : int) (base : int) = 
+  if n = 0 then [0] 
+  else let chiffres = ref [] in 
+    let n = ref n in 
+    while !n > 0 do
+      chiffres := (!n mod base)::!chiffres;
+      n := !n / base; 
+    done; 
+    !chiffres;;
+  
+
+decomposition 13 2;; 
+  
+(*suite recurrente lineaire type fibo*)
+  
+let fibonacci (n : int) = 
+  if n = 0 then 0 
+  else begin
+    let a = ref 0 in 
+    let b = ref 1 in 
+    for _ = 2 to n do 
+      let tmp = !a + !b in 
+      a := !b; 
+      b := tmp; 
+    done; 
+    !b; 
+  end;;
+  
+  
+fibonacci 12;; 
+
+(*insertion élément dans liste triée*) 
+
+let rec inserer x = function 
+  |[] -> [x] 
+  |a::q -> if a > x then x::a::q 
+      else a::(inserer x q);;
+
+inserer 3 [2; 4; 7];;
+
+(*dichotomie dans tableau trie*) 
+
+let rec dicho  (t : int array) (x : int) = 
+  let len = Array.length t in 
+  let deb = ref 0 and fin = ref (len-1) in 
+  let rep = ref (-1) in 
+  while !deb <= !fin && !rep = -1 do 
+    let mid = (!deb + !fin) / 2 in 
+    if t.(mid) = x then rep := mid 
+    else if t.(mid) < x then deb := mid+1 
+    else fin := mid -1
+  done; 
+  !rep;;
+  
+  
+dicho [| 2; 4; 5; 7; 11; 13; 19|] 11;;
+  
+(*nombre de noeuds et hauteur d'un arbre*) 
+
+type 'a arbre = Noeud of 'a *'a arbre list;;
+
+let rec nb_noeuds = function 
+  |Noeud(_, enfants) -> 1 + List.fold_left ( fun acc e -> acc + (nb_noeuds e) ) 0 enfants;;
+
+let rec hauteur  = function 
+  |Noeud(_, []) -> 0
+  |Noeud(_, enfants) -> 1 + List.fold_left (fun acc e -> acc + (hauteur e)) 0 enfants;;
+
+
+let arbre_ex =
+  Noeud (1, [
+      Noeud (2, []);
+      Noeud (3, []);
+      Noeud (4, [])
+    ]);;
+  
+nb_noeuds arbre_ex;; 
+hauteur arbre_ex;;
+
+(*algorithmes arbre binaire*) 
+type 'a arbin = Vide | Noeubin of 'a arbin * 'a * 'a arbin;;
+
+(*parcours infixe*)
+
+let rec infixe = function 
+  |Vide -> () 
+  |Noeubin(g, x, d) -> infixe g; print_int x; print_string ""; infixe d;;
+
+let rec prefixe = function
+  |Vide -> ()
+  |Noeubin(g, x, d) -> print_int x; print_string ""; prefixe g; prefixe d;; 
+
+let rec suffixe = function 
+  |Vide -> ()
+  |Noeubin(g, x, d) -> suffixe g; suffixe d; print_string ""; print_int x;;
+
+
+let arbre =
+  Noeubin(
+    Noeubin(Vide, 2, Vide),
+    1,
+    Noeubin(
+      Noeubin(Vide, 4, Vide),
+      3,
+      Vide
+    )
+  );;
+
+infixe arbre;; 
+prefixe arbre;; 
+suffixe arbre;; 
+
+
+(*produit matriciel naif*) 
+
+type matrice = int array array;;
+
+let produit_mat (a : matrice) (b : matrice) = 
+  let n = Array.length a in 
+  let p = Array.length b in 
+  let q = Array.length a.(0) in 
+  let c = Array.make_matrix n q 0 in 
+  for i = 0 to n-1 do
+    for j = 0 to p-1 do
+      for k = 0 to q-1 do 
+        c.(i).(j)  <- c.(i).(j) + a.(i).(k) * b.(k).(j); 
+      done; 
+    done; 
+  done; 
+  c;;
+
+(*miroir de liste*) 
+
+let miroir liste = 
+  let rec aux acc = function
+    |[] -> acc 
+    |a::q -> aux (a::acc) q
+  in aux [] liste;;
+
+miroir [6; 9; 10];;
+
+
+(*implementation file*)
+
+let creer_file () = ([], []);; 
+
+let est_file_vide (lp, la) = 
+  lp = [] && la = [];;
+
+let enfiler (lp, la) x = (x::lp, la);; 
+
+let taille (lp, la) = List.length lp + List.length la;;
+
+let rec transfert = function
+  |([],la) -> ([],la)
+  |((e::lp),la) -> transfert(lp,e::la);;
+
+
+let defiler (lp, la) = 
+  if est_file_vide (lp, la) then failwith "file vide" 
+  else if la <> [] then (List.hd la, (lp, List.tl la))
+  else let (lp2, la2) = transfert (lp, la) in
+    (List.hd la2, (lp2, List.tl la2));; 
+
+(*parcours en largeur arbre binaire*) 
+
+let largeurbin arbre = 
+  let rec largeurbinaux file = 
+    if not (est_file_vide file) then begin 
+      let (a, reste) = defiler file in 
+      match a with 
+      |Vide -> largeurbinaux reste
+      |Noeubin(g, x, d) -> print_int x; print_string ""; largeurbinaux (enfiler (enfiler reste g) d) 
+    end 
+  in largeurbinaux (enfiler (creer_file ()) arbre);; 
+
+(*recherche abr*)
+
+let rec recherche a x = match a with
+  |Vide -> false 
+  |Noeubin(g, e, d) -> if e = x then true 
+      else if x < e then recherche g x 
+      else recherche d x;; 
+
+(*insertion abr*) 
+
+let rec insertion x = function
+  |Vide -> Noeubin(Vide, x, Vide) 
+  |Noeubin(g, e, d) -> if x = e then Noeubin(g, x, d) 
+      else if x < e then Noeubin (insertion x g, e, d)
+      else Noeubin (g, e, insertion x d);; 
